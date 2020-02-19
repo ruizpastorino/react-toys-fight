@@ -5,7 +5,7 @@ class SelectPlayers extends Component {
 
   render() {
     return (
-      <div className="container">
+      <div className="container-fluid">
         <h1>TOYS MORTAL FIGHT</h1>
         <div className="players-chart">
           <PlayersChart />

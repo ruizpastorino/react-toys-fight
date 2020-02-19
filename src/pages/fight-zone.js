@@ -213,7 +213,7 @@ class FightZone extends Component {
   };
   render() {
     return (
-      <div className="container pt-3">
+      <div className="container-fluid m-0 pt-3">
         <Wall status={'up'}/>
         <DataDisplay
           players={this.state.players}

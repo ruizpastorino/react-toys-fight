@@ -9,7 +9,7 @@ import Home from "./pages/home";
 class App extends Component {
   render() {
     return (
-      <div>
+      <div className="container-fluid m-0 p-0 w-100">
         <Router>
           <Switch>
             <Route exact path='/' component={Home}/>
