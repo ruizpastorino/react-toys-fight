@@ -1,0 +1,408 @@
+* {
+  text-align: center;
+  color: white;
+  margin: 0%;
+  padding: 0%;
+}
+h2 {
+  z-index: 99;
+}
+a:hover {
+  text-decoration: none !important;
+}
+body {
+  background: radial-gradient(
+    circle,
+    rgb(111, 226, 235) 34%,
+    rgb(38, 102, 107) 97%
+  );
+}
+@font-face {
+  font-family: mk1;
+  src: url(./media/mk1.ttf);
+}
+@font-face {
+  font-family: MK4;
+  src: url(./media/MK4.TTF);
+}
+h4 {
+  font-family: mk4;
+  font-size: 200% !important;
+}
+h1,
+h2,
+h3 {
+  font-family: mk1;
+}
+
+.start-title {
+  transform: skewY(-10deg);
+  -webkit-text-stroke-width: 1.5px;
+  -webkit-text-stroke-color: rgb(255, 102, 0);
+}
+.display-xl {
+  transform: skewY(-10deg);
+  font-size: 12em;
+  margin-top: -8%;
+  box-shadow: rgba(0, 0, 0, 0.5);
+  animation: title-blink 15ms infinite;
+}
+@keyframes title-blink {
+  0% {
+    color: blue;
+  }
+  50% {
+    color: white;
+  }
+  100% {
+    color: red;
+  }
+}
+.mortal-title {
+  margin-top: -10% !important;
+}
+.game-font,
+h1 {
+  color: rgb(255, 217, 0);
+  text-shadow: red 1px 2px 3px;
+}
+.hand-pointer {
+  cursor: pointer;
+  text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.7);
+}
+.chart-bg {
+  box-sizing: inherit;
+  background-image: url(./media/img/stone-bg.jpg);
+  object-fit: fill;
+  background-size: 50%;
+  z-index: 0;
+  border: solid 20px rgba(0, 0, 0, 0.5);
+}
+.bg-pause {
+  background-color: rgba(26, 26, 26, 0.6);
+  z-index: 120;
+  width: 100%;
+  animation: show-pause 250ms linear;
+}
+@keyframes show-pause {
+  0% {
+    transform: scale(0);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.text-shadow {
+  text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+}
+
+.player-2 {
+  transform: scaleX(-1);
+}
+.thumb-fighter {
+  width: 120px;
+  height: 120px;
+  cursor: pointer;
+  padding: 2px;
+}
+.chart-size {
+  width: 200px;
+  height: 425px;
+  margin-top: -20px;
+}
+.chart-btn {
+  width: 150px;
+}
+.blink:hover {
+  animation: blink 130ms infinite;
+}
+
+@keyframes blink {
+  0% {
+    background-color: rgb(255, 0, 0);
+  }
+  50% {
+    background-color: yellow;
+  }
+  100% {
+    background-color: rgb(0, 4, 255);
+  }
+}
+.blink2:hover {
+  animation: blink2 130ms infinite;
+}
+@keyframes blink2 {
+  0% {
+    background-color: rgb(47, 0, 255);
+  }
+  50% {
+    background-color: yellow;
+  }
+  100% {
+    background-color: rgb(51, 255, 0);
+  }
+}
+.set-color {
+  filter: hue-rotate(75deg);
+}
+.health-thumb {
+  width: 75px;
+  height: 75px;
+  box-shadow: 2px 2px 10px 1px black;
+}
+.health {
+  position: relative;
+  overflow: hidden;
+  width: 400px;
+  height: 25px;
+  border: solid 1px rgb(255, 145, 0);
+  background-color: rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-flow: row-reverse;
+}
+.energy {
+  background-color: rgb(61, 214, 107);
+  height: 25px;
+  transition: all 300ms;
+  opacity: 0.5;
+}
+.start-button {
+  position: fixed;
+  top: 0%;
+  left: 50%;
+}
+.p1-zone {
+  position: fixed;
+  left: 420px;
+  bottom: 25px;
+  
+}
+
+.p2-zone {
+  position: fixed;
+  right: 420px;
+  bottom: 25px;
+  z-index: -1;
+  
+}
+.text-out {
+  color: rgb(250, 118, 118);
+}
+.on-top {
+  z-index: 10;
+}
+.below {
+  z-index: -1;
+}
+.hide-title {
+  transform: scale(0);
+}
+.show-title {
+  transform: scale(0);
+  animation: show-title 1000ms;
+  z-index: 100;
+}
+.text-blink {
+  animation: textBlink 140ms infinite;
+}
+@keyframes textBlink {
+  0% {
+    color: rgb(255, 255, 255);
+  }
+  25% {
+    color: rgb(255, 196, 0);
+  }
+  75% {
+    color: rgb(255, 196, 0);
+  }
+  100% {
+    color: rgb(255, 255, 255);
+  }
+}
+
+@keyframes show-title {
+  0% {
+    transform: scale(0);
+  }
+  25% {
+    transform: scale(3);
+  }
+  75% {
+    transform: scale(3);
+  }
+  100% {
+    transform: scale(0);
+  }
+}
+.show-round {
+  animation: show-round 1000ms;
+  z-index: 100;
+}
+
+@keyframes show-round {
+  0% {
+    transform: scale(0);
+  }
+  25% {
+    transform: scale(3);
+  }
+  75% {
+    transform: scale(3);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.shake {
+  animation: shake 220ms infinite;
+}
+@keyframes shake {
+  0% {
+    transform: translate(1px, 1px) rotate(0deg);
+  }
+  10% {
+    transform: translate(-1px, -2px) rotate(-1deg);
+  }
+  20% {
+    transform: translate(-3px, 0px) rotate(1deg);
+  }
+  30% {
+    transform: translate(3px, 2px) rotate(0deg);
+  }
+  40% {
+    transform: translate(1px, -1px) rotate(1deg);
+  }
+  50% {
+    transform: translate(-1px, 2px) rotate(-1deg);
+  }
+  60% {
+    transform: translate(-3px, 1px) rotate(0deg);
+  }
+  70% {
+    transform: translate(3px, 1px) rotate(-1deg);
+  }
+  80% {
+    transform: translate(-1px, -1px) rotate(1deg);
+  }
+  90% {
+    transform: translate(1px, 2px) rotate(0deg);
+  }
+  100% {
+    transform: translate(1px, -2px) rotate(-1deg);
+  }
+}
+.shake-once {
+  animation: shake 300ms linear;
+}
+.settings-shadows {
+  text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.7);
+}
+.chart-btn:hover {
+  background-color: rgba(0, 0, 0, 0.5) !important;
+}
+.toasty img {
+  position: fixed;
+  right: -100%;
+  bottom: 0%;
+}
+.show-toasty img {
+  animation: toasty 2000ms linear;
+}
+@keyframes toasty {
+  0% {
+    margin-right: 0%;
+  }
+  25% {
+    margin-right: 100%;
+  }
+  75% {
+    margin-right: 100%;
+  }
+  100% {
+    margin-right: 0%;
+  }
+}
+.show-display {
+  animation: show-display 1200ms linear;
+}
+@keyframes show-display {
+  0% {
+    margin-top: -50%;
+  }
+  100% {
+    margin-top: 0%;
+  }
+}
+.exit-button {
+  position: fixed;
+  top: 60%;
+  z-index: 100;
+}
+
+.darkly {
+  filter: brightness(0.3);
+}
+.wall-down1 {
+  z-index: 200;
+  position: fixed;
+  top: 0%;
+  left: 0%;
+  animation: openUp 1000ms linear;
+}
+
+@keyframes openUp {
+  0%{
+    top:-100%
+  }
+  100%{
+    top:0%;
+  }
+}
+.wall-down2 {
+  z-index: 200;
+  position: fixed;
+  bottom: 0%;
+  left: 0%;
+  animation: openDown 1000ms linear;
+}
+@keyframes openDown{
+  0%{
+    bottom:-100%
+  }
+  100%{
+    bottom:0%;
+  }
+}
+
+/********/
+.wall-up1 {
+  z-index: 200;
+  position: fixed;
+  top: -100%;
+  left: 0%;
+  animation: closeUp 1000ms linear;
+}
+
+@keyframes closeUp {
+  0%{
+    top:0%
+  }
+  100%{
+    top:-100%;
+  }
+}
+.wall-up2 {
+  z-index: 200;
+  position: fixed;
+  bottom: -100%;
+  left: 0%;
+  animation: closeDown 1000ms linear;
+}
+@keyframes closeDown{
+  0%{
+    bottom:0%
+  }
+  100%{
+    bottom:-100%;
+  }
+}
