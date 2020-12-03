@@ -1,329 +1,216 @@
-import React, { Component } from "react";
+import React, { useState, useEffect } from "react";
 import PlayerMapping from "../components/palyer-mapping";
 import { Link } from "react-router-dom";
 import DataDisplay from "../components/data-display";
 import { withRouter } from "react-router-dom";
-import toasty from "../media/img/toasty.png";
+import Toasty from "../media/img/toasty.png";
 import PauseScreen from "../components/pause-screen";
-import Wall from '../components/wall';
+import Wall from "../components/wall";
+import { GetData } from "../data-context";
 
 let _timeInterval;
 let _roundInterval;
 
-class FightZone extends Component {
-  state = {
-    settings: {
-      rounds: 3,
-      time: 20,
-      handicap: 2,
-      recovery: 1,
-      speed: 3
-    },
-    players: [
-      {
-        data: {},
-        health: 100,
-        wins: 0
-      },
-      {
-        data: {},
-        health: 100,
-        wins: 0
-      }
-    ],
-    timeRunning: false,
-    time: 20,
-    round: 1,
-    shift: 0,
-    toggleRound: false,
-    winner: false,
-    toasty: false,
-  };
+const FightZone = (props) => {
+  let [winner, setWinner] = useState(false);
+  let [time, setTime] = useState(99);
+  let [round, setRound] = useState(1);
+  let [players, setPlayers] = useState(initPlayers);
+  let [toasty, setToasty] = useState(false);
+  const [utility, setUtility] = useState(initUtility);
 
-  componentDidMount() {
-    let data = JSON.parse(localStorage.getItem("players"));
-    let players = this.state.players;
-     if (data !== null) {
-    players[0].data = data[0];
-    players[1].data = data[1];
-    } else {
-    this.props.history.push("/players");
-    }
-    let settings = JSON.parse(localStorage.getItem("fightData"));
-    if (settings === null) {
-      settings = { rounds: 3, time: 20, handicap: 2, recovery: 1, speed: 3 };
-    }
-    this.setState({
-      settings,
-      time: settings.time,
-      players: players
-    });
-  }
+  let { settings, playerOne, playerTwo } = GetData();
 
-  handleSwitchTime = () => {
-    let timeRunning = this.state.timeRunning;
+  const { rounds, handicap, recovery, speed } = settings;
+  let { timeRunning, shift, attack } = utility;
+
+  useEffect(() => {
+    setTime(settings.time);
+    players[0].data = playerOne;
+    players[1].data = playerTwo;
+    players[0].wins = 0;
+    players[1].wins = 0;
+    reload();
+  }, [playerTwo, playerOne]);
+
+  const handleStartButton = () => {
+    timeRunning = !timeRunning;
     if (timeRunning) {
-      timeRunning = false;
+      _roundInterval = setInterval(handleFight, (1 / speed) * 750);
+      _timeInterval = setInterval(timeDown, 1000);
     } else {
-      timeRunning = true;
+      stopFight();
     }
-    this.setState({ timeRunning }, () => {
-      this.handleFight();
-    });
+    setUtility({ ...utility, timeRunning });
   };
 
-  handleFight = () => {
-    if (this.state.timeRunning === true) {
-      this.timeDown();
-      this.fightOn();
-    } else {
-      this.fightOff();
-    }
-  };
-
-  fightOn = () => {
-    _roundInterval = setInterval(() => {
-      let toggleRound = this.state.toggleRound;
-
-      if (toggleRound) {
-        toggleRound = false;
-        this.healthDown();
-      } else if (
-        this.state.players[0].health > 0 &&
-        this.state.players[1].health > 0
-      ) {
-        let shift = Math.floor(Math.random() * 2);
-        this.setState({ shift }, this.healthRecovery());
-        toggleRound = true;
-      }
-      this.setState({ toggleRound });
-    }, (1 / this.state.settings.speed) * 750);
-  };
-  fightOff = () => {
+  const stopFight = () => {
+    setUtility({ ...utility, attack: false });
     clearInterval(_timeInterval);
     clearInterval(_roundInterval);
   };
 
-  timeDown = () => {
-    _timeInterval = setInterval(() => {
-      if (this.state.time > 0 && this.state.winner === false) {
-        let time = this.state.time - 1;
-        this.setState({ time });
+  const handleFight = () => {
+    if (players[0].health > 0 && players[1].health > 0) {
+      attack = !attack;
+      if (attack) {
+        shift = Math.floor(Math.random() * 2);
+        let hit = Math.floor(Math.random() * (2 + handicap * 10) + 1);
+        handleToasty(hit);
+        players[shift].health -= hit;
+        if (players[shift].health < 0) {
+          players[shift].health = 0;
+        }
+        setPlayers(players);
+      } else {
+        healthRecovery();
       }
-      if (this.state.time <= 0) {
-        this.fightOff();
-        this.setState({
-          toggleRound: false,
-          winner: true
-        });
-      }
-    }, 1000);
+    } else {
+      handleWinner();
+      stopFight();
+    }
+    setUtility({ ...utility, timeRunning, attack, shift });
   };
 
-  healthDown = () => {
-    let shift = this.state.shift;
-    let players = this.state.players;
-    let hit = Math.floor(
-      Math.random() * (2 + this.state.settings.handicap * 10) + 1
-    );
-    this.handleToasty(hit);
-    let health = parseInt(players[shift].health) - hit;
-    if (health < 0) {
-      health = 0;
+  const timeDown = () => {
+    time--;
+    setTime(time);
+    if (time === 0) {
+      handleWinner();
+      stopFight();
     }
-    players[shift].health = health;
-    this.setState({ players }, this.handleWinner());
   };
-  healthRecovery = () => {
-    let players = this.state.players;
-    let shift = Math.floor(Math.random() * 2);
-    let random = Math.floor(
-      ((Math.random() * 1) / this.state.settings.recovery) * 10
-    );
+
+  const healthRecovery = () => {
+    shift = Math.floor(Math.random() * 2);
+    let random = Math.floor(((Math.random() * 1) / recovery) * 10);
     if (random === 0) {
       if (players[shift].health < 100) {
-        let extraLife = Math.floor(
-          Math.random() * (5 + this.state.settings.handicap * 10)
-        );
+        let extraLife = Math.floor(Math.random() * (5 + handicap * 10));
         players[shift].health = parseInt(players[shift].health) + extraLife;
         if (players[shift].health > 99) {
           players[shift].health = 99;
         }
-        this.setState({
-          players
-        });
+        setPlayers(players);
       }
     }
   };
-  handleWinner = () => {
-    if (
-      this.state.players[0].health === 0 ||
-      this.state.players[1].health === 0
-    ) {
-      let player = this.state.players;
-      let winner;
-      if (player[0].health > player[1].health) {
-        winner = player[0];
-      } else {
-        winner = player[1];
-      }
-      winner.wins++;
-      this.setState({
-        wins: winner.wins
-      });
-      this.setState({
-        winner: true
-      });
-    }
-  };
-  handleRounds = () => {
-    let round = this.state.round;
+
+  const handleWinner = () => {
+    let h1 = players[0].health;
+    let h2 = players[1].health;
     round++;
-    this.setState({
-      round
-    });
+    if (h1 !== h2) {
+      winner = h1 > h2 ? players[0] : players[1];
+      winner.wins += 1;
+      winner.data.victories += 1;
+      setWinner(winner);
+    } else {
+      setWinner("TIE");
+    }
+    setRound(round);
   };
-  rebirth = () => {
-    let players = this.state.players;
-    players[0].health = 100;
-    players[1].health = 100;
-    this.setState({
-      players,
-      timeRunning: false,
-      time: this.state.settings.time,
-      round: 0,
-      shift: 0,
-      toggleRound: false,
-      winner: false,
-      toasty: false
-    });
-  };
-  nextRound =()=>{
-    this.rebirth();
-    this.handleRounds();
-    this.fightOff();
-  }
-  reSelect = () => {
-    this.props.history.push("/players");
-  };
-  handleToasty = hit => {
-    if (hit > this.state.settings.handicap * 10) {
-      this.setState({ toasty: true });
+
+  const reload = () => {
+    if (round <= rounds) {
+      players.map((player) => {
+        player.health = 100;
+      });
+      time = settings.time;
+      setPlayers(players);
+      setTime(time);
+      setWinner(false);
+      setUtility({ ...initUtility });
+      setToasty(false);
+    } else {
+      props.history.push("/players");
     }
   };
-  render() {
-    return (
-      <div className="container-fluid m-0 pt-3">
-        <Wall status={'up'}/>
-        <DataDisplay
-          players={this.state.players}
-          time={this.state.time}
-          round={this.state.round}
-          runButton={
-            this.state.winner
-              ? this.state.round === this.state.settings.rounds
-                ? this.reSelect
-                : this.nextRound
-              : this.handleSwitchTime
-          }
-          timeRunning={this.state.timeRunning}
-        />
 
-        <div className="row justify-content-center mt-3">
-          <h2
-            className={
-              this.state.timeRunning &&
-              this.state.time === this.state.settings.time
-                ? "display-1 show-title game-font"
-                : "hide-title"
-            }
-          >
-            fight!
-          </h2>
+  const handleToasty = (hit) => {
+    if (hit > handicap * 10 && !toasty) {
+      setToasty(true);
+    }
+  };
 
-          {this.state.winner ? (
-            <h2 className="display-2 text-shadow position-fixed">
-              {this.state.players[0].health > this.state.players[1].health
-                ? this.state.players[0].data.name.toUpperCase()
-                : this.state.players[1].data.name.toUpperCase()}{" "}
-              WINS
+  return (
+    <div>
+      <Wall status={"up"} />
+      <DataDisplay data={{ players, timeRunning, time, round }} actions={{ handleStartButton, reload }} />
+      {/* fight area */}
+      <div className="d-flex justify-content-center mt-3">
+        <h2 className={timeRunning && time === settings.time ? "display-1 show-title game-font" : "hide-title"}>
+          fight!
+        </h2>
+        {/* titles */}
+        <div style={{ zIndex: 100 }} className="position-fixed">
+          {!winner ? null : (
+            <h2 className="display-2 text-shadow">
+              {winner !== "TIE" ? winner.data.name.toUpperCase() + " WINS" : "TIE FIGH!"}
             </h2>
-          ) : (
-            ""
           )}
 
-          {this.state.winner === true ? (
-            this.state.players[0].health === 100 ||
-            this.state.players[1].health === 100 ? (
+          {winner ? (
+            players[0].health === 100 || players[1].health === 100 ? (
               <h2 className="w-100 text-blink mt-5">flawless victory</h2>
-            ) : (
-              ""
-            )
-          ) : (
-            ""
-          )}
-          {this.state.winner ? (
-            <div className="exit-button">
-              <Link to="/players">
-                <h3 className="rounded p-3 settings-shadows">Select Again</h3>
-              </Link>
-            </div>
-          ) : (
-            ""
-          )}
-          <div
-            className={
-              this.state.shift === 1
-                ? "show-player p1-zone on-top"
-                : "show-player p1-zone below"
-            }
-          >
-            <PlayerMapping
-              action={
-                this.state.toggleRound
-                  ? this.state.shift === 0
-                    ? "hited"
-                    : "hit"
-                  : "static"
-              }
-              selected={this.state.players[0].data}
-            />
-          </div>
-          <div
-            className={
-              this.state.players[0].data.key === this.state.players[1].data.key
-                ? "player-2 set-color p2-zone"
-                : "player-2 p2-zone"
-            }
-          >
-            <PlayerMapping
-              action={
-                this.state.toggleRound
-                  ? this.state.shift === 1
-                    ? "hited"
-                    : "hit"
-                  : "static"
-              }
-              selected={this.state.players[1].data}
-            />
-          </div>
+            ) : null
+          ) : null}
         </div>
-        {this.state.players[0].health === 100 &&
-        this.state.players[1].health === 100 ? (
-          ""
-        ) : this.state.timeRunning === false ? (
-          <div className="container col-4 p-2 bg-pause rounded">
-            <PauseScreen resume={this.handleSwitchTime} restart={this.rebirth} />
+        {winner ? (
+          <div className="exit-button text-center">
+            <Link to="/players">
+              <h3 className="rounded p-3 settings-shadows">Select Again</h3>
+            </Link>
           </div>
-        ) : (
-          ""
-        )}
-        <div className={`toasty ${this.state.toasty ? "show-toasty" : ""}`}>
-          <img src={toasty} alt="" />
+        ) : null}
+        {/* figthers area */}
+        <div className={`p1-zone ${shift === 1 ? "on-top" : "below"}`}>
+          <PlayerMapping
+            timerunning={!winner}
+            action={attack ? (shift === 0 ? "hited" : "hit") : "static"}
+            player={playerOne}
+          />
+        </div>
+        <div className={`player-2 p2-zone ${players[0].data.name === players[1].data.name ? "set-color" : null}`}>
+          <PlayerMapping
+            timerunning={!winner}
+            action={attack ? (shift === 1 ? "hited" : "hit") : "static"}
+            player={playerTwo}
+          />
         </div>
       </div>
-    );
-  }
-}
+      {/* pause screen */}
+      {time < settings.time && !timeRunning && !winner ? (
+        <div className="container col-4 p-2 bg-pause rounded">
+          <PauseScreen resume={handleStartButton} restart={reload} />
+        </div>
+      ) : null}
+      {/* toasty guy */}
+      {toasty ? (
+        <div className="toasty">
+          <img src={Toasty} alt="" />
+        </div>
+      ) : null}
+    </div>
+  );
+};
 
 export default withRouter(FightZone);
+
+const initPlayers = [
+  {
+    data: {},
+    health: 100,
+    wins: 0,
+  },
+  {
+    data: {},
+    health: 100,
+    wins: 0,
+  },
+];
+const initUtility = {
+  timeRunning: false,
+  shift: 0,
+  attack: false,
+};
